@@ -70,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
             if((Seconds==12)&&((MilliSeconds>=0)&&(MilliSeconds<=16)))
             {
 
+                beepsound.play(SoundId,1,1,0,0,1);
 
             }
 
