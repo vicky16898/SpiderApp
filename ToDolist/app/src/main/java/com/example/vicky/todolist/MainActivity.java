@@ -13,10 +13,13 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.SparseBooleanArray;
+import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -149,77 +152,120 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+
         list = (ListView)findViewById(R.id.list);
         object = new ArrayList<NotesContent>();
 
-        adapter = new CustomArrayAdapter(MainActivity.this , object);
+        adapter = new CustomArrayAdapter(MainActivity.this ,R.layout.edit_content , object);
+        // Binds the Adapter to the ListView
+        list.setAdapter(adapter);
+        list.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+
+
+
         db = new DatabaseHelper(MainActivity.this);
         retriveData();
 
 
-
-
-
-
-        list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        list.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
             @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
-
-
-                final int tempId = object.get(position).id;
-
-                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-
-                builder.setTitle("Delete!!");
-                builder.setMessage("Are you sure?");
-
-                builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
-
-                    public void onClick(DialogInterface dialog, int which) {
-                        object.remove(position);
-
-                        list.setAdapter(adapter);
-
-                        db.deleteData(tempId);
-
-                        dialog.dismiss();
-                    }
-                });
-
-                builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-
-                        dialog.dismiss();
-                    }
-                });
-
-                AlertDialog alert = builder.create();
-                alert.show();
+            public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
 
 
 
+                // Capture total checked items
+                final int checkedCount = list.getCheckedItemCount();
+                // Set the CAB title according to total checked items
+                mode.setTitle(checkedCount +" Items Selected");
 
+                // Calls toggleSelection method from ListViewAdapter Class
+                adapter.toggleSelection(position);
 
+            }
 
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
 
-
-
-
-
-
-
-
-
-
-
-
-
+                mode.getMenuInflater().inflate(R.menu.multiple_delete, menu);
                 return true;
+
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.delete:
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+                        builder.setTitle("Delete!!");
+                        builder.setMessage("Are you sure want to delete the selected items?");
+
+                        builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+
+                            public void onClick(DialogInterface dialog, int which) {
+                                // Calls getSelectedIds method from ListViewAdapter Class
+                                SparseBooleanArray selected = adapter
+                                        .getSelectedIds();
+                                // Captures all selected ids with a loop
+                                for (int i = (selected.size() - 1); i >= 0; i--) {
+                                    if (selected.valueAt(i)) {
+                                        NotesContent selected_item = adapter
+                                                .getItem(selected.keyAt(i));
+                                        // Remove selected items following the ids
+
+                                       adapter.remove(selected_item);
+                                       db.deleteData(selected_item.id);
+
+                                    }
+                                }
+                                // Close CAB
+
+
+
+                            }
+                        });
+
+                        builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+
+                                dialog.dismiss();
+                            }
+                        });
+
+                        AlertDialog alert = builder.create();
+                        alert.show();
+                        mode.finish();
+                        return true;
+
+
+
+                    default:
+                        return false;
+                }
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+
+
+
             }
         });
+
+
+
+
+
+
+
 
 
 

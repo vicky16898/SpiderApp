@@ -3,19 +3,21 @@ package com.example.vicky.todolist;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.widget.RemoteViews;
+import android.widget.Toast;
 
 public class MyWidgetProvider extends AppWidgetProvider {
 
 
 
-    public static final String ACTION_VIEW_DETAILS =
-            "com.company.android.ACTION_VIEW_DETAILS";
-    public static final String EXTRA_ITEM =
-            "com.company.android.MyWidgetProvider.EXTRA_ITEM";
+
+
+
+
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -26,21 +28,12 @@ public class MyWidgetProvider extends AppWidgetProvider {
 
             Intent intent = new Intent(context, CollectionWidgetService.class);
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
-
             RemoteViews widgetView = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
             widgetView.setRemoteAdapter(R.id.listWidget, intent);
             widgetView.setEmptyView(R.id.listWidget, R.id.empty);
-
-            Intent detailIntent = new Intent(ACTION_VIEW_DETAILS);
-            PendingIntent pIntent = PendingIntent.getBroadcast(context, 0, detailIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            widgetView.setPendingIntentTemplate(R.id.listWidget, pIntent);
-
             appWidgetManager.updateAppWidget(widgetId, widgetView);
 
-
-
-
-
+            sendRefreshBroadcast(context);
 
 
 
@@ -52,16 +45,22 @@ public class MyWidgetProvider extends AppWidgetProvider {
     }
 
 
+    public static void sendRefreshBroadcast(Context context) {
+        Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        intent.setComponent(new ComponentName(context, MyWidgetProvider .class));
+        context.sendBroadcast(intent);
+    }
+
+
+    @Override
     public void onReceive(Context context, Intent intent) {
 
-        if(intent.getAction().equals(ACTION_VIEW_DETAILS)) {
-            NotesContent singleTask = (NotesContent) intent.getSerializableExtra(EXTRA_ITEM);
-            if(singleTask != null) {
-
-
-
-
-            }
+        final String action = intent.getAction();
+        if (action.equals(AppWidgetManager.ACTION_APPWIDGET_UPDATE)) {
+            // refresh all your widgets
+            AppWidgetManager mgr = AppWidgetManager.getInstance(context);
+            ComponentName cn = new ComponentName(context, MyWidgetProvider.class);
+            mgr.notifyAppWidgetViewDataChanged(mgr.getAppWidgetIds(cn), R.id.listWidget);
         }
 
         super.onReceive(context, intent);

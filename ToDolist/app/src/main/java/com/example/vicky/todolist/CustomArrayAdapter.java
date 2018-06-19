@@ -3,10 +3,12 @@ package com.example.vicky.todolist;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.lang.reflect.Array;
@@ -16,10 +18,17 @@ import java.util.List;
 public class CustomArrayAdapter extends ArrayAdapter<NotesContent> {
 
 
+    private SparseBooleanArray mSelectedItemsIds;
     public ArrayList<NotesContent> subject = new ArrayList<NotesContent>();
-    public CustomArrayAdapter(Context context,  ArrayList<NotesContent> objects) {
-        super(context, 0 ,objects);
+
+
+
+
+    public CustomArrayAdapter(Context context, int resourceid ,  ArrayList<NotesContent> objects) {
+        super(context, resourceid ,objects);
+        mSelectedItemsIds = new SparseBooleanArray();
         subject = objects;
+
     }
 
     @NonNull
@@ -42,5 +51,41 @@ public class CustomArrayAdapter extends ArrayAdapter<NotesContent> {
 
 
         return  v;
+    }
+    @Override
+    public void remove(NotesContent object) {
+        subject.remove(object);
+        notifyDataSetChanged();
+    }
+
+    public List<NotesContent> getWorldPopulation() {
+        return subject;
+    }
+
+    public void toggleSelection(int position) {
+        selectView(position, !mSelectedItemsIds.get(position));
+
+
+    }
+
+    public void removeSelection() {
+        mSelectedItemsIds = new SparseBooleanArray();
+        notifyDataSetChanged();
+    }
+
+    public void selectView(int position, boolean value) {
+        if (value)
+            mSelectedItemsIds.put(position, value);
+        else
+            mSelectedItemsIds.delete(position);
+        notifyDataSetChanged();
+    }
+
+    public int getSelectedCount() {
+        return mSelectedItemsIds.size();
+    }
+
+    public SparseBooleanArray getSelectedIds() {
+        return mSelectedItemsIds;
     }
 }

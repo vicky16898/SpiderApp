@@ -4,6 +4,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
+import android.os.Binder;
 import android.os.Parcelable;
 import android.util.Log;
 import android.widget.RemoteViews;
@@ -18,18 +20,23 @@ public class WidgetFactory implements RemoteViewsService.RemoteViewsFactory {
 
     private ArrayList<NotesContent> Task;
     private Context mContext;
+    private Cursor res;
 
     public WidgetFactory(Context context) {
         mContext = context;
-       Task = new ArrayList<NotesContent>();
+
     }
 
 
     @Override
     public void onCreate() {
 
+
+
+        Task = new ArrayList<NotesContent>();
+
         DatabaseHelper db = new DatabaseHelper(mContext);
-        Cursor res = db.getALLdata();
+        res = db.getALLdata();
 
         if(res.getCount()!=0) {
 
@@ -66,9 +73,13 @@ public class WidgetFactory implements RemoteViewsService.RemoteViewsFactory {
     public void onDataSetChanged() {
 
 
+    Log.d("check" , "onDataSetChanged");
 
 
-    }
+
+   }
+
+
 
     @Override
     public void onDestroy() {
@@ -88,9 +99,6 @@ public class WidgetFactory implements RemoteViewsService.RemoteViewsFactory {
 
         itemView.setTextViewText(R.id.content, singleTask.details);
         itemView.setTextViewText(R.id.date1, singleTask.date);
-
-
-
 
 
         return itemView;
