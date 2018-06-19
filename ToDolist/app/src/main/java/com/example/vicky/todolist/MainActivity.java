@@ -168,6 +168,11 @@ public class MainActivity extends AppCompatActivity {
 
 
         list.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
+
+
+
+
+
             @Override
             public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
 
@@ -177,6 +182,8 @@ public class MainActivity extends AppCompatActivity {
                 final int checkedCount = list.getCheckedItemCount();
                 // Set the CAB title according to total checked items
                 mode.setTitle(checkedCount +" Items Selected");
+
+
 
                 // Calls toggleSelection method from ListViewAdapter Class
                 adapter.toggleSelection(position);
@@ -197,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            public boolean onActionItemClicked(final ActionMode mode, MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.delete:
                         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -208,9 +215,13 @@ public class MainActivity extends AppCompatActivity {
                         builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
 
                             public void onClick(DialogInterface dialog, int which) {
+
+
+
                                 // Calls getSelectedIds method from ListViewAdapter Class
-                                SparseBooleanArray selected = adapter
-                                        .getSelectedIds();
+                               SparseBooleanArray selected = adapter.getSelectedIds();
+                               Log.d("Selectedids" , String.valueOf(selected));
+
                                 // Captures all selected ids with a loop
                                 for (int i = (selected.size() - 1); i >= 0; i--) {
                                     if (selected.valueAt(i)) {
@@ -224,6 +235,9 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                 }
                                 // Close CAB
+                                mode.finish();
+                                selected.clear();
+                                object = adapter.getWorldPopulation();
 
 
 
@@ -242,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
 
                         AlertDialog alert = builder.create();
                         alert.show();
-                        mode.finish();
+
                         return true;
 
 

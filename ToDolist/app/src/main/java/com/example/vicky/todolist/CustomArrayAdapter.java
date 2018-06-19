@@ -58,7 +58,7 @@ public class CustomArrayAdapter extends ArrayAdapter<NotesContent> {
         notifyDataSetChanged();
     }
 
-    public List<NotesContent> getWorldPopulation() {
+    public ArrayList<NotesContent> getWorldPopulation() {
         return subject;
     }
 
